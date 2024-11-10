@@ -14,49 +14,58 @@ public class Clicker : MonoBehaviour
     [Header("VFX")]
     public ParticleSystem clickVFX;
 
-    [HideInInspector] public int clicks = 0; // Total clicks
+    [HideInInspector] public int clicks = 0;
     private AudioSource audioSource;
+    private int oldClicks = 0;
 
-    private float timeSinceLastClick = 0f; // Timer to track time for CPS calculation
-    private int clicksInLastSecond = 0; // Clicks in the last second (for CPS)
 
     private void Start()
     {
+        clicks = PlayerPrefs.GetInt("clicks", 0);
         audioSource = GetComponent<AudioSource>();
-    }
-
-    private void Update()
-    {
-        // Track time to calculate CPS
-        timeSinceLastClick += Time.deltaTime;
-
-        // Once a second has passed, update CPS and reset
-        if (timeSinceLastClick >= 1f)
-        {
-            UiManager.instance.UpdateCPS(clicksInLastSecond);
-            clicksInLastSecond = 0;
-            timeSinceLastClick = 0f;
-        }
+        InvokeRepeating("CountCps", 1, 1);
     }
 
     private void OnMouseDown()
     {
-        // Increment the click count
-        clicks++;
-        clicksInLastSecond++; // Increment the clicks for CPS calculation
+        clickVFX.Emit(1);
 
-        // Update the click count UI
+        clicks++;
         UiManager.instance.UpdateClicks(clicks);
 
-        // Play VFX and sound
-        clickVFX.Emit(1);
         audioSource.pitch = Random.Range(0.9f, 1.1f);
         audioSource.PlayOneShot(clickSound);
 
-        // Animate the clicker object
         transform
             .DOScale(1, duration)
             .ChangeStartValue(scale * Vector3.one)
             .SetEase(ease);
+        //.SetLoops(2, LoopType.Yoyo);3
+    }
+
+    void CountCps()
+    {
+        int cps = clicks - oldClicks;
+        oldClicks = clicks;
+
+        if (cps > 0)
+            UiManager.instance.UpdateCps(cps);
+    }
+
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+            Save();
+    }
+
+    private void OnApplicationQuit()
+    {
+        Save();
+    }
+
+    private void Save()
+    {
+        PlayerPrefs.SetInt("clicks", clicks);
+        PlayerPrefs.Save();
     }
 }

@@ -3,35 +3,34 @@ using UnityEngine;
 
 public class UiManager : MonoBehaviour
 {
-    // Singleton pattern - only one instance of this class can exist
+    //step 1: create a static instance of this class
     public static UiManager instance;
+    public TextMeshProUGUI clickText;
+    public TextMeshProUGUI cpsText;
 
-    [Header("UI References")]
-    public TextMeshProUGUI clickText;  // Text field to display total clicks
-    public TextMeshProUGUI cpsText;    // Text field to display CPS
-
+    //step 2: method thats executed earlier than Start()
     private void Awake()
     {
-        // Singleton setup
+        //step 3: check if ui manager does not exists yet
         if (instance == null)
         {
+            //step 4: set this instance as the ui manager
             instance = this;
         }
         else
         {
+            //step 5: destroy this instance if another ui manager exists
             Destroy(gameObject);
         }
     }
 
     public void UpdateClicks(int clicks)
     {
-        // Update the total click count
         clickText.text = clicks.ToString();
     }
 
-    public void UpdateCPS(int cps)
+    public void UpdateCps(int cps)
     {
-        // Update the CPS display
-        cpsText.text = cps.ToString();
+        cpsText.text = $"{cps} cps";
     }
 }

@@ -15,5 +15,8 @@ public class ShopButton : MonoBehaviour
     {
         priceText.text = $"price: {price}";
         countText.text = count.ToString();
+        PlayerPrefs.SetString("countText", countText.text);
+        PlayerPrefs.Save();
     }
+
 }
